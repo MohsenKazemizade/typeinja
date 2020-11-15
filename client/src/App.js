@@ -1,4 +1,9 @@
 import React, { Fragment } from 'react';
-const App = () => <Fragment className='App'>salam</Fragment>;
+import Fa from './components/Fa';
+const App = () => (
+  <Fragment>
+    <Fa />
+  </Fragment>
+);
 
 export default App;
