@@ -6,24 +6,31 @@ const TypiestSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  firstName: {
+  firstname: {
     type: String,
     required: true,
   },
-  lastName: {
+  lastname: {
     type: String,
     required: true,
   },
   email: {
     type: String,
   },
+  avatar: {
+    type: String,
+  },
   password: {
     type: String,
     required: true,
   },
-  agreeWithRules: {
+  agreewithrules: {
     type: Boolean,
     required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
   },
 });
 

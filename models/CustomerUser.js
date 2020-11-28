@@ -13,9 +13,16 @@ const CustomerSchema = new mongoose.Schema({
   email: {
     type: String,
   },
-  agreeWithRules: {
+  avatar: {
+    type: String,
+  },
+  agreewithrules: {
     type: Boolean,
     required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
   },
 });
 

@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 });
 
 //Define Routes
-app.use('/api/custuser', require('./routes/api/customerUsers'));
+app.use('/api/customer', require('./routes/api/customerUsers'));
 app.use('/api/typiest', require('./routes/api/typiestusers'));
 app.use('/api/Admin', require('./routes/api/adminUser'));
 const PORT = process.env.PORT || 5000;

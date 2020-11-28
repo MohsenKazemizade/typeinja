@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { body, checkSchema, validationResult } = require('express-validator');
+const CustomerUser = require('../../models/CustomerUser');
+const gravatar = require('gravatar');
+const bcrypt = require('bcryptjs');
 
 //makeing schema for mobile number regex looks like working like this
 //and then using in in request
@@ -41,20 +44,44 @@ router.post(
       .withMessage('email is required')
       .isEmail()
       .withMessage('email is invalid'),
-    body('agreeWithRules')
+    body('agreewithrules')
       .isBoolean()
       .withMessage('not a boolean')
       .matches('true')
       .withMessage('Rules need to be true'),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    const { phone, name, email, agreewithrules } = req.body;
+    try {
+      let customerUser = await CustomerUser.findOne({ phone });
+      if (customerUser) {
+        //do something to lead user right to profile
+        return;
+      }
+      const avatar = gravatar.url(email, {
+        s: '200',
+        r: 'pg',
+        d: 'mm',
+      });
 
-    res.send('customerUsers!');
+      customerUser = new CustomerUser({
+        phone,
+        name,
+        email,
+        avatar,
+        agreewithrules,
+      });
+      await customerUser.save();
+      res.send('customerUsers registered!');
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send('server error');
+    }
   }
 );
 module.exports = router;

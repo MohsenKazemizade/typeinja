@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { body, checkSchema, validationResult } = require('express-validator');
+const TypiestUser = require('../../models/TypiestUser');
+const gravatar = require('gravatar');
+const bcrypt = require('bcryptjs');
 
 const schema = {
   phone: {
@@ -60,20 +63,61 @@ router.post(
       .isLength({ min: 8, max: 33 })
       .withMessage('password needs to have at least 8 charactors'),
     checkSchema(schema),
-    body('agreeWithRules')
+    body('agreewithrules')
       .isBoolean()
       .withMessage('not a boolean')
       .matches('true')
       .withMessage('Rules need to be true'),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    const {
+      phone,
+      firstname,
+      lastname,
+      email,
+      password,
+      agreewithrules,
+    } = req.body;
+    try {
+      //see if user exist
+      let typiestUser = await TypiestUser.findOne({ phone });
+      if (typiestUser) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'user already exist' }] });
+      }
+      //get user gravatar
+      const avatar = gravatar.url(email, {
+        s: '200',
+        r: 'pg',
+        d: 'mm',
+      });
 
-    res.send('typiestUser!');
+      typiestUser = new TypiestUser({
+        phone,
+        firstname,
+        lastname,
+        email,
+        avatar,
+        password,
+        agreewithrules,
+      });
+      //encrypt password
+      const salt = await bcrypt.genSalt(10);
+      typiestUser.password = await bcrypt.hash(password, salt);
+      await typiestUser.save();
+
+      //return jsonwebtoken
+      res.send('typiestUser registered!');
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send('server error');
+    }
   }
 );
 module.exports = router;
