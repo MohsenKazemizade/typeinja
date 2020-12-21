@@ -4,6 +4,7 @@ const { body, checkSchema, validationResult } = require('express-validator');
 const CustomerUser = require('../../models/CustomerUser');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 //makeing schema for mobile number regex looks like working like this
 //and then using in in request
@@ -60,8 +61,9 @@ router.post(
     try {
       let customerUser = await CustomerUser.findOne({ phone });
       if (customerUser) {
-        //do something to lead user right to profile
-        return;
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'user already exist' }] });
       }
       const avatar = gravatar.url(email, {
         s: '200',
@@ -77,7 +79,22 @@ router.post(
         agreewithrules,
       });
       await customerUser.save();
-      res.send('customerUsers registered!');
+
+      const payload = {
+        customerUser: {
+          id: customerUser.id,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        config.get('jwtSecret'),
+        { expiresIn: '24h' },
+        (err, token) => {
+          if (err) throw err;
+          res.send({ token });
+        }
+      );
     } catch (err) {
       console.log(err.message);
       res.status(500).send('server error');

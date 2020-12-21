@@ -4,7 +4,8 @@ const { body, checkSchema, validationResult } = require('express-validator');
 const TypiestUser = require('../../models/TypiestUser');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
-
+const jwt = require('jsonwebtoken');
+const config = require('config');
 const schema = {
   phone: {
     in: 'body',
@@ -109,11 +110,27 @@ router.post(
       });
       //encrypt password
       const salt = await bcrypt.genSalt(10);
+
       typiestUser.password = await bcrypt.hash(password, salt);
+
       await typiestUser.save();
 
       //return jsonwebtoken
-      res.send('typiestUser registered!');
+      const payload = {
+        typiestUser: {
+          id: typiestUser.id,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        config.get('jwtSecret'),
+        { expiresIn: '24h' },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
     } catch (err) {
       console.log(err.message);
       res.status(500).send('server error');

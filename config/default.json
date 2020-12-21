@@ -1,3 +1,4 @@
 {
-  "mongoURI": "mongodb+srv://type123:iamlegend1109@cluster0.siksf.mongodb.net/<dbname>?retryWrites=true&w=majority"
+  "mongoURI": "mongodb+srv://type123:iamlegend1109@cluster0.siksf.mongodb.net/<dbname>?retryWrites=true&w=majority",
+  "jwtSecret": "mysecrettoken"
 }
