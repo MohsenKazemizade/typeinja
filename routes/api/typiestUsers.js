@@ -86,8 +86,8 @@ router.post(
     } = req.body;
     try {
       //see if user exist
-      let typiestUser = await TypiestUser.findOne({ phone });
-      if (typiestUser) {
+      let user = await TypiestUser.findOne({ phone });
+      if (user) {
         return res
           .status(400)
           .json({ errors: [{ msg: 'user already exist' }] });
@@ -99,7 +99,7 @@ router.post(
         d: 'mm',
       });
 
-      typiestUser = new TypiestUser({
+      user = new TypiestUser({
         phone,
         firstname,
         lastname,
@@ -111,14 +111,14 @@ router.post(
       //encrypt password
       const salt = await bcrypt.genSalt(10);
 
-      typiestUser.password = await bcrypt.hash(password, salt);
+      user.password = await bcrypt.hash(password, salt);
 
-      await typiestUser.save();
+      await user.save();
 
       //return jsonwebtoken
       const payload = {
-        typiestUser: {
-          id: typiestUser.id,
+        user: {
+          id: user.id,
         },
       };
 

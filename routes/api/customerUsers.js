@@ -4,6 +4,7 @@ const { body, checkSchema, validationResult } = require('express-validator');
 const CustomerUser = require('../../models/CustomerUser');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const config = require('config');
 const jwt = require('jsonwebtoken');
 
 //makeing schema for mobile number regex looks like working like this
@@ -59,8 +60,8 @@ router.post(
     }
     const { phone, name, email, agreewithrules } = req.body;
     try {
-      let customerUser = await CustomerUser.findOne({ phone });
-      if (customerUser) {
+      let user = await CustomerUser.findOne({ phone });
+      if (user) {
         return res
           .status(400)
           .json({ errors: [{ msg: 'user already exist' }] });
@@ -71,18 +72,18 @@ router.post(
         d: 'mm',
       });
 
-      customerUser = new CustomerUser({
+      user = new CustomerUser({
         phone,
         name,
         email,
         avatar,
         agreewithrules,
       });
-      await customerUser.save();
+      await user.save();
 
       const payload = {
-        customerUser: {
-          id: customerUser.id,
+        user: {
+          id: user.id,
         },
       };
 
@@ -92,7 +93,7 @@ router.post(
         { expiresIn: '24h' },
         (err, token) => {
           if (err) throw err;
-          res.send({ token });
+          res.json({ token });
         }
       );
     } catch (err) {
